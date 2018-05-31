@@ -82,6 +82,8 @@ dependencies {
     compile 'org.grails.plugins:postgresql-extensions:5.2.0'
     //runtime 'org.postgresql:postgresql:42.1.1'
     
+    compile group: 'org.springframework.boot', name: 'spring-boot-starter-activemq'
+    
     compile group: 'org.apache.activemq', name: 'activemq-camel', version:"${activeMQVersion}"
     
     compile group: 'org.apache.camel', name: 'camel-spring-boot', version:"${camelVersion}"
