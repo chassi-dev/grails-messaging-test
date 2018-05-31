@@ -35,8 +35,6 @@ kick off the load:
 com.microservice.routes.ProducerConsumerRouteBuilder.producerBatchSize = 100
 
 synchronized(com.microservice.ProducerConsumerService?.inflightInstances) {
-println "${com.microservice.ProducerConsumerService?.inflightInstances?.toString()}"
-
 com.microservice.ProducerConsumerService?.inflightInstances?.size()
 }
 
@@ -59,5 +57,20 @@ com.microservice.routes.ProducerConsumerRouteBuilder.producerBatchSize = 0
 synchronized(com.microservice.ProducerConsumerService?.inflightInstances) {
 com.microservice.ProducerConsumerService?.inflightInstances?.size()
 }
+```
+
+MUST WAIT UNTIL PROCESSING FINISHED
 
 
+list the unresolved messages:
+```
+
+com.microservice.routes.ProducerConsumerRouteBuilder.producerBatchSize = 0
+
+synchronized(com.microservice.ProducerConsumerService?.inflightInstances) {
+println "${com.microservice.ProducerConsumerService?.inflightInstances?.toString()}"
+
+com.microservice.ProducerConsumerService?.inflightInstances?.size()
+}
+
+```
