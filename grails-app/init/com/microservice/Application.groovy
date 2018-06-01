@@ -9,7 +9,7 @@ import org.springframework.context.annotation.ComponentScan
 @ComponentScan
 class Application extends GrailsAutoConfiguration {
 	@Autowired
-	BeansConfiguration beansConfiguration
+	ConfigBeans configBeans
 	
     static void main(String[] args) {
 		final GrailsApp app = new BannerGrailsApp(Application)
