@@ -12,8 +12,8 @@ import org.springframework.stereotype.Service
 @Service
 class ProducerConsumerRouteBuilder extends RouteBuilder {
     
-    static Integer MAX_PRODUCER_BATCH_SIZE = 50
-    static Integer producerBatchSize = 10
+    static Integer MAX_PRODUCER_BATCH_SIZE = 100
+    static Integer producerBatchSize = 0
     static Integer maxConcurrentConsumers = 20
     
     @Autowired
@@ -24,7 +24,24 @@ class ProducerConsumerRouteBuilder extends RouteBuilder {
     
     void configure() {
         
-        from("timer:producer-timer?delay=1000&period=500&fixedRate=true")
+        // initial startup
+        from("timer:wakeup-message?delay=500&repeatCount=1")
+            .routeId('wakeup-message')
+            .log('Starting producers')
+            .process { Exchange exchange ->
+                    producerBatchSize = 50
+                }
+        
+        // ramp down after 10 mins, iterating 30 times
+        from("timer:ramping-down?delay=30s&period=1000&repeatCount=30")
+            .routeId('ramping-down')
+            .process { Exchange exchange ->
+                    producerBatchSize = 0
+                    exchange.in.body = producerConsumerService.getRemainingUnresolvedCount()
+                }
+            .to('log:ramping-down')
+        
+        from("timer:producer-timer?delay=5000&period=500&fixedRate=true")
             .routeId('producer-timer')
             //.to('log:producer-timer')
             .setHeader('batchRecipientList', constant(''))
@@ -35,15 +52,31 @@ class ProducerConsumerRouteBuilder extends RouteBuilder {
                         batchRecipientList = targetRoute
                     } else if (producerBatchSize > 1) {
                         Integer tmpBatchSize = producerBatchSize < MAX_PRODUCER_BATCH_SIZE ? producerBatchSize : MAX_PRODUCER_BATCH_SIZE
-                        batchRecipientList = ( [1..tmpBatchSize].collect { it.collect { targetRoute }.join(',') }[0] )
+                        // as comma separated list
+                        //batchRecipientList = ( [1..tmpBatchSize].collect { it.collect { targetRoute }.join(',') }[0] )
                         //println batchRecipientList
+                        
+                        // as List<String>
+                        batchRecipientList = [targetRoute].multiply(tmpBatchSize)
                     }
-                    //exchange.in.setBody(batchRecipientList, String.class)
-                    exchange.in.headers['batchRecipientList'] = batchRecipientList
+                    
+                    //exchange.in.headers['batchRecipientList'] = batchRecipientList
+                    exchange.in.body = batchRecipientList
                 }
             //.to("log:producer-timer?showHeaders=true")
-            //.recipientList(simple('${body}')).parallelProcessing()
-            .recipientList( header('batchRecipientList'), ',' ).parallelProcessing()
+            
+            // as comma separated list above
+            //.recipientList( header('batchRecipientList'), ',' ).parallelProcessing()
+            
+            // as List<String> above
+//            .split(simple("header.batchRecipientList")).parallelProcessing().streaming()
+//                .to('direct:producer-create-instance')
+//            .end()
+            
+            // as List<String> above
+            .split(body()).parallelProcessing().streaming()
+                .to('direct:producer-create-instance')
+            .end()
 
         from('direct:producer-create-instance')
             .routeId('producer-create-instance')
@@ -68,7 +101,7 @@ class ProducerConsumerRouteBuilder extends RouteBuilder {
                     LogMessage logMessage = exchange.in.getBody(LogMessage)
                     exchange.in.headers['resolveInstanceResult'] = producerConsumerService.resolveInstance(logMessage?.logMessageId)
                 }
-            .delay(100)
+            //.delay(100)
 
     }
 }
