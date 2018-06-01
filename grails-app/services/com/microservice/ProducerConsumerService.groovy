@@ -7,12 +7,20 @@ import grails.gorm.transactions.Transactional
 class ProducerConsumerService {
     
     static final HashMap<String,Object> inflightInstances = [:]
+    static Integer logMessageCount = 0
+    
+    int bumpCount() {
+        int count = 0
+        synchronized (logMessageCount) {
+            count = ++logMessageCount
+        }
+    }
     
     LogMessage createInstance() {
         LogMessage logMessage = new LogMessage()
         
         logMessage.logMessageId = UUID.randomUUID().toString()
-        logMessage.logMessage = logMessage.logMessageId
+        logMessage.logMessage = "message count = ${bumpCount()}"
         logMessage.dateCreated = new Date()
         logMessage.lastUpdated = logMessage.dateCreated
         
@@ -39,7 +47,11 @@ class ProducerConsumerService {
         }
     }
     
-    
+    Integer getRemainingUnresolvedCount() {
+        synchronized (inflightInstances) {
+            return inflightInstances.size()
+        }
+    }
     
 }
 
