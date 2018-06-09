@@ -25,7 +25,7 @@ class ConfigBeans {
     @Primary
     @Bean('jmsConnectionFactory')
     public ActiveMQConnectionFactory jmsConnectionFactory() {
-        String brokerURL = "tcp://${System.getenv('AMQ_HOST')?.trim() ?: '0.0.0.0'}:${System.getenv('AMQ_PORT')?.trim() ?: '61616'}?wireFormat.maxInactivityDurationInitalDelay=15000"
+        String brokerURL = "tcp://${System.getenv('AMQ_HOST')?.trim() ?: '0.0.0.0'}:${System.getenv('AMQ_PORT')?.trim() ?: '61616'}?wireFormat.maxInactivityDurationInitalDelay=15000&jms.prefetchPolicy.all=1"
         
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
         connectionFactory.setBrokerURL(brokerURL);
@@ -42,7 +42,7 @@ class ConfigBeans {
     @Bean(initMethod = "start", destroyMethod = "stop")
     public PooledConnectionFactory pooledConnectionFactory() {
         PooledConnectionFactory pooledConnectionFactory = new PooledConnectionFactory();
-        pooledConnectionFactory.setMaxConnections(10);
+        pooledConnectionFactory.setMaxConnections(100);
         pooledConnectionFactory.setConnectionFactory(jmsConnectionFactory());
         return pooledConnectionFactory;
     }
