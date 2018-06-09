@@ -23,8 +23,8 @@ apply plugin:"asset-pipeline"
 apply plugin:"org.grails.grails-gsp"
 apply plugin: 'maven'
 
-def activeMQVersion = '5.14.5'
-def camelVersion = '2.20.2'
+def activeMQVersion = '5.15.4'
+def camelVersion = '2.21.1'
 
 
 repositories {
