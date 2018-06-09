@@ -11,6 +11,10 @@ export AMQ_HOST=localhost
 export AMQ_PORT=61616
 export AMQ_USER=mquser
 export AMQ_PASS=mqpass
+export ENABLE_CONSUMER_PRODCER_TEST=false
+export ENABLE_BENCHMARK_TEST=true
+export BENCHMARK_THREADS=20
+export BENCHMARK_TOTAL_MSGS=1000
 
 ```
 

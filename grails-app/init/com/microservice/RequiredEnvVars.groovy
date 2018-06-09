@@ -17,5 +17,10 @@ class RequiredEnvVars {
         [key: 'AMQ_PORT', required: true],
         [key: 'AMQ_USER', required: true],
         [key: 'AMQ_PASS', required: true],
+        
+        [key: 'ENABLE_CONSUMER_PRODCER_TEST', required: true],
+        [key: 'ENABLE_BENCHMARK_TEST', required: true],
+        [key: 'BENCHMARK_THREADS', required: true],
+        [key: 'BENCHMARK_TOTAL_MSGS', required: true],
     ]
 }
