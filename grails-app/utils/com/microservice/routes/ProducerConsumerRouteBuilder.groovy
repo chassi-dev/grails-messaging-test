@@ -24,84 +24,90 @@ class ProducerConsumerRouteBuilder extends RouteBuilder {
     
     void configure() {
         
-        // initial startup
-        from("timer:wakeup-message?delay=500&repeatCount=1")
-            .routeId('wakeup-message')
-            .log('Starting producers')
-            .process { Exchange exchange ->
-                    producerBatchSize = 50
-                }
+        def enableProducerConsumerTest = "${System.getenv('ENABLE_CONSUMER_PRODCER_TEST')?.trim() ?: 'true'}"?.toString()?.toLowerCase()
         
-        // ramp down after 10 mins, iterating 30 times
-        from("timer:ramping-down?delay=30s&period=1000&repeatCount=30")
-            .routeId('ramping-down')
-            .process { Exchange exchange ->
-                    producerBatchSize = 0
-                    exchange.in.body = producerConsumerService.getRemainingUnresolvedCount()
-                }
-            .to('log:ramping-down')
+        if (enableProducerConsumerTest == 'true') {
+            
         
-        from("timer:producer-timer?delay=5000&period=500&fixedRate=true")
-            .routeId('producer-timer')
-            //.to('log:producer-timer')
-            .setHeader('batchRecipientList', constant(''))
-            .process { Exchange exchange ->
-                    String targetRoute = 'direct:producer-create-instance'
-                    String batchRecipientList = ''
-                    if (producerBatchSize == 1) {
-                        batchRecipientList = targetRoute
-                    } else if (producerBatchSize > 1) {
-                        Integer tmpBatchSize = producerBatchSize < MAX_PRODUCER_BATCH_SIZE ? producerBatchSize : MAX_PRODUCER_BATCH_SIZE
-                        // as comma separated list
-                        //batchRecipientList = ( [1..tmpBatchSize].collect { it.collect { targetRoute }.join(',') }[0] )
-                        //println batchRecipientList
-                        
-                        // as List<String>
-                        batchRecipientList = [targetRoute].multiply(tmpBatchSize)
+            // initial startup
+            from("timer:wakeup-message?delay=500&repeatCount=1")
+                .routeId('wakeup-message')
+                .log('Starting producers')
+                .process { Exchange exchange ->
+                        producerBatchSize = 50
                     }
-                    
-                    //exchange.in.headers['batchRecipientList'] = batchRecipientList
-                    exchange.in.body = batchRecipientList
-                }
-            //.to("log:producer-timer?showHeaders=true")
             
-            // as comma separated list above
-            //.recipientList( header('batchRecipientList'), ',' ).parallelProcessing()
+            // ramp down after 10 mins, iterating 30 times
+            from("timer:ramping-down?delay=30s&period=1000&repeatCount=30")
+                .routeId('ramping-down')
+                .process { Exchange exchange ->
+                        producerBatchSize = 0
+                        exchange.in.body = producerConsumerService.getRemainingUnresolvedCount()
+                    }
+                .to('log:ramping-down')
             
-            // as List<String> above
-//            .split(simple("header.batchRecipientList")).parallelProcessing().streaming()
-//                .to('direct:producer-create-instance')
-//            .end()
+            from("timer:producer-timer?delay=5000&period=500&fixedRate=true")
+                .routeId('producer-timer')
+                //.to('log:producer-timer')
+                .setHeader('batchRecipientList', constant(''))
+                .process { Exchange exchange ->
+                        String targetRoute = 'direct:producer-create-instance'
+                        String batchRecipientList = ''
+                        if (producerBatchSize == 1) {
+                            batchRecipientList = targetRoute
+                        } else if (producerBatchSize > 1) {
+                            Integer tmpBatchSize = producerBatchSize < MAX_PRODUCER_BATCH_SIZE ? producerBatchSize : MAX_PRODUCER_BATCH_SIZE
+                            // as comma separated list
+                            //batchRecipientList = ( [1..tmpBatchSize].collect { it.collect { targetRoute }.join(',') }[0] )
+                            //println batchRecipientList
+                            
+                            // as List<String>
+                            batchRecipientList = [targetRoute].multiply(tmpBatchSize)
+                        }
+                        
+                        //exchange.in.headers['batchRecipientList'] = batchRecipientList
+                        exchange.in.body = batchRecipientList
+                    }
+                //.to("log:producer-timer?showHeaders=true")
+                
+                // as comma separated list above
+                //.recipientList( header('batchRecipientList'), ',' ).parallelProcessing()
+                
+                // as List<String> above
+    //            .split(simple("header.batchRecipientList")).parallelProcessing().streaming()
+    //                .to('direct:producer-create-instance')
+    //            .end()
+                
+                // as List<String> above
+                .split(body()).parallelProcessing().streaming()
+                    .to('direct:producer-create-instance')
+                .end()
+    
+            from('direct:producer-create-instance')
+                .routeId('producer-create-instance')
+                .process { Exchange exchange ->
+                        exchange.in.setBody(producerConsumerService.createInstance(), LogMessage.class)
+                    }
+                .to("log:producer-create-instance")
+                .to('direct:producer-queue')
             
-            // as List<String> above
-            .split(body()).parallelProcessing().streaming()
-                .to('direct:producer-create-instance')
-            .end()
-
-        from('direct:producer-create-instance')
-            .routeId('producer-create-instance')
-            .process { Exchange exchange ->
-                    exchange.in.setBody(producerConsumerService.createInstance(), LogMessage.class)
-                }
-            .to("log:producer-create-instance")
-            .to('direct:producer-queue')
-        
-        String producerQueueName = "producerconsumer.1.producer-queue"
-        
-        from('direct:producer-queue')
-            .routeId('producer-queue')
-            .marshal().json(JsonLibrary.Jackson, LogMessage.class, true)
-            .to("activemq:queue:${producerQueueName}")
-        
-        from("activemq:queue:${producerQueueName}?maxConcurrentConsumers=${maxConcurrentConsumers}")
-            .routeId('consumer-from-queue')
-            .unmarshal().json(JsonLibrary.Jackson, LogMessage.class)
-            .to("log:consumer-from-queue")
-            .process { Exchange exchange ->
-                    LogMessage logMessage = exchange.in.getBody(LogMessage)
-                    exchange.in.headers['resolveInstanceResult'] = producerConsumerService.resolveInstance(logMessage?.logMessageId)
-                }
-            //.delay(100)
+            String producerQueueName = "producerconsumer.1.producer-queue"
+            
+            from('direct:producer-queue')
+                .routeId('producer-queue')
+                .marshal().json(JsonLibrary.Jackson, LogMessage.class, true)
+                .to("activemq:queue:${producerQueueName}")
+            
+            from("activemq:queue:${producerQueueName}?maxConcurrentConsumers=${maxConcurrentConsumers}")
+                .routeId('consumer-from-queue')
+                .unmarshal().json(JsonLibrary.Jackson, LogMessage.class)
+                .to("log:consumer-from-queue")
+                .process { Exchange exchange ->
+                        LogMessage logMessage = exchange.in.getBody(LogMessage)
+                        exchange.in.headers['resolveInstanceResult'] = producerConsumerService.resolveInstance(logMessage?.logMessageId)
+                    }
+                //.delay(100)
+        }
 
     }
 }
