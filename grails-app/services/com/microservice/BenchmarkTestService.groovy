@@ -39,7 +39,7 @@ class BenchmarkTestService {
         
         def threadPool = Executors.newFixedThreadPool(4)
         
-        Date startTime = new Date()
+        long startTime = System.currentTimeMillis()
         
         try {
             List<Future> futures = (1..concurrentThreads).collect { num ->
@@ -60,13 +60,13 @@ class BenchmarkTestService {
             threadPool.shutdown()
         }
         
-        Date stopTime = new Date()
-        TimeDuration timeDuration = TimeCategory.minus(stopTime, startTime)
+        long stopTime = System.currentTimeMillis()
+        float durationInSeconds = new Float((stopTime - startTime) / 1000F).round(3)
         
-        def messagesPerSecond = new Float(messageCount / timeDuration.toMilliseconds() * 1000.0).round(3)
+        def messagesPerSecond = new Float(totalMessagesToSend / durationInSeconds).round(3)
         
         log.info "Total messages sent: ${totalMessagesToSend}"
-        log.info "Time: ${timeDuration}"
+        log.info "Time: ${durationInSeconds} s"
         log.info "Messages per second: ${messagesPerSecond}"
     }
     
