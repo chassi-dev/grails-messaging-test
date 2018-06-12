@@ -49,7 +49,7 @@ class BenchmarkTestRouteBuilder extends RouteBuilder {
                 .routeId('benchmark-producer')
                 .setExchangePattern(ExchangePattern.InOnly)
                 .marshal().json(JsonLibrary.Jackson, String.class, true)
-                .to("activemq:topic:${producerQueueName}?disableTimeToLive=true")
+                .to("activemq:queue:${producerQueueName}?disableTimeToLive=true")
             
 //            from("activemq:queue:${producerQueueName}?maxConcurrentConsumers=${concurrentThreads}")
 //                .routeId('benchmark-consumer')
