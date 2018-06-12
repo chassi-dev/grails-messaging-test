@@ -64,7 +64,7 @@ class ConfigBeans {
     
     @Bean
     public ActiveMQComponent activemq() {
-        ActiveMQComponent activeMQComponent = new ActiveMQComponent(connectionFactory: jmsConnectionFactory())
+        ActiveMQComponent activeMQComponent = new ActiveMQComponent(connectionFactory: pooledConnectionFactory())
         return activeMQComponent
     }
     
