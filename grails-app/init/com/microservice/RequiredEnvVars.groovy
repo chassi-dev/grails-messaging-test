@@ -22,5 +22,6 @@ class RequiredEnvVars {
         [key: 'ENABLE_BENCHMARK_TEST', required: true],
         [key: 'BENCHMARK_THREADS', required: true],
         [key: 'BENCHMARK_TOTAL_MSGS', required: true],
+        [key: 'ENABLE_REQUEST_REPLY_TEST', required: true],
     ]
 }
