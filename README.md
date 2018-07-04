@@ -1,13 +1,15 @@
 
 ## Environment Variables
 
+Note support of multiple clustered messaging brokers with comma delimited AMQ_HOST (IP address or hostname)
+
 ```
 
 export API_SERVER_ADDRESS=localhost
 export API_SERVER_PORT=8080
 export ADMIN_SERVER_PORT=9080
 export API_REST_SERVER_PROTOCOL=http
-export AMQ_HOST=localhost
+export AMQ_HOST=localhost,remotehost2,remotehost3
 export AMQ_PORT=61616
 export AMQ_USER=mquser
 export AMQ_PASS=mqpass
