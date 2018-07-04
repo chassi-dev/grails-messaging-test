@@ -25,10 +25,16 @@ class ConfigBeans {
     @Primary
     @Bean('jmsConnectionFactory')
     public ActiveMQConnectionFactory jmsConnectionFactory() {
-        String brokerURL = "tcp://${System.getenv('AMQ_HOST')?.trim() ?: '0.0.0.0'}:${System.getenv('AMQ_PORT')?.trim() ?: '61616'}?wireFormat.maxInactivityDurationInitalDelay=15000&jms.prefetchPolicy.all=1"
         
-        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory();
-        connectionFactory.setBrokerURL(brokerURL);
+        // supports single or comma-separated amqHost brokers
+        String amqHost = System.getenv('AMQ_HOST')?.trim() ?: 'localhost'
+        Integer amqPort = Integer.parseInt( (System.getenv('AMQ_PORT')?.trim() ?: '61616') )
+        
+        def amqHostConnectionList = amqHost.split(',').collect { "tcp://${it.trim()}:${amqPort}" }.join(',')
+        String amqURLString = "failover:(${amqHostConnectionList})?nested.wireFormat.maxInactivityDuration=5000&jms.prefetchPolicy.all=1"
+        
+        ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory()
+        connectionFactory.setBrokerURL(amqURLString)
         
         String userName = System.getenv('AMQ_USER')?.trim() ?: 'mquser'
         String password = System.getenv('AMQ_PASS')?.trim() ?: 'mqpass'
@@ -36,30 +42,30 @@ class ConfigBeans {
         connectionFactory.setUserName(userName)
         connectionFactory.setPassword(password)
         
-        return connectionFactory;
+        return connectionFactory
     }
     
     @Bean(initMethod = "start", destroyMethod = "stop")
     public PooledConnectionFactory pooledConnectionFactory() {
-        PooledConnectionFactory pooledConnectionFactory = new PooledConnectionFactory();
-        pooledConnectionFactory.setMaxConnections(100);
-        pooledConnectionFactory.setConnectionFactory(jmsConnectionFactory());
-        return pooledConnectionFactory;
+        PooledConnectionFactory pooledConnectionFactory = new PooledConnectionFactory()
+        pooledConnectionFactory.setMaxConnections(100)
+        pooledConnectionFactory.setConnectionFactory(jmsConnectionFactory())
+        return pooledConnectionFactory
     }
     
     @Bean
     public JmsConfiguration getJmsConfiguration() {
-        JmsConfiguration jmsConfiguration = new JmsConfiguration();
-        jmsConfiguration.setConnectionFactory(pooledConnectionFactory());
-        return jmsConfiguration;
+        JmsConfiguration jmsConfiguration = new JmsConfiguration()
+        jmsConfiguration.setConnectionFactory(pooledConnectionFactory())
+        return jmsConfiguration
     }
     
     @Bean
     public JmsConfiguration getJmsHighPriorityConfiguration() {
-        JmsConfiguration jmsConfiguration = new JmsConfiguration();
-        jmsConfiguration.setConnectionFactory(pooledConnectionFactory());
-        jmsConfiguration.setPriority(8);
-        return jmsConfiguration;
+        JmsConfiguration jmsConfiguration = new JmsConfiguration()
+        jmsConfiguration.setConnectionFactory(pooledConnectionFactory())
+        jmsConfiguration.setPriority(8)
+        return jmsConfiguration
     }
     
     @Bean
@@ -70,13 +76,13 @@ class ConfigBeans {
     
     //@Override
     protected void setupCamelContext(CamelContext camelContext) throws Exception {
-        ActiveMQComponent activeMQComponent = new ActiveMQComponent();
-        activeMQComponent.setConfiguration(getJmsConfiguration());
-        camelContext.addComponent("activemq", activeMQComponent);
+        ActiveMQComponent activeMQComponent = new ActiveMQComponent()
+        activeMQComponent.setConfiguration(getJmsConfiguration())
+        camelContext.addComponent("activemq", activeMQComponent)
 
-        ActiveMQComponent activeMQHighPriorityComponent = new ActiveMQComponent();
-        activeMQHighPriorityComponent.setConfiguration(getJmsHighPriorityConfiguration());
-        camelContext.addComponent("activemq-high-priority", activeMQHighPriorityComponent);
+        ActiveMQComponent activeMQHighPriorityComponent = new ActiveMQComponent()
+        activeMQHighPriorityComponent.setConfiguration(getJmsHighPriorityConfiguration())
+        camelContext.addComponent("activemq-high-priority", activeMQHighPriorityComponent)
     }
     
     /*
