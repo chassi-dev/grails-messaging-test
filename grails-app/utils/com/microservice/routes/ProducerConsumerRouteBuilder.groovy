@@ -42,7 +42,7 @@ class ProducerConsumerRouteBuilder extends RouteBuilder {
                 .routeId('ramping-down')
                 .process { Exchange exchange ->
                         producerBatchSize = 0
-                        exchange.in.body = producerConsumerService.getRemainingUnresolvedCount()
+                        exchange.in.body = "getRemainingUnresolvedCount: ${producerConsumerService.getRemainingUnresolvedCount()}".toString()
                     }
                 .to('log:ramping-down')
             
