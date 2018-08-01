@@ -13,8 +13,7 @@ class RequiredEnvVars {
         [key: 'ADMIN_SERVER_PORT', required: true],
         [key: 'API_REST_SERVER_PROTOCOL', required: true],
         
-        [key: 'AMQ_HOST', required: true],
-        [key: 'AMQ_PORT', required: true],
+        [key: 'AMQ_CONNECTION_LIST', required: true],
         [key: 'AMQ_USER', required: true],
         [key: 'AMQ_PASS', required: true],
         
