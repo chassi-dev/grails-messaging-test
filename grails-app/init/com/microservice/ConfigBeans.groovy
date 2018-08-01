@@ -27,11 +27,8 @@ class ConfigBeans {
     public ActiveMQConnectionFactory jmsConnectionFactory() {
         
         // supports single or comma-separated amqHost brokers
-        String amqHost = System.getenv('AMQ_HOST')?.trim() ?: 'localhost'
-        Integer amqPort = Integer.parseInt( (System.getenv('AMQ_PORT')?.trim() ?: '61616') )
-        
-        def amqHostConnectionList = amqHost.split(',').collect { "tcp://${it.trim()}:${amqPort}" }.join(',')
-        String amqURLString = "failover:(${amqHostConnectionList})?nested.wireFormat.maxInactivityDuration=5000&jms.prefetchPolicy.all=1"
+        def amqConnectionList = System.getenv('AMQ_CONNECTION_LIST')?.trim() ?: 'tcp://localhost:61616'
+        String amqURLString = "failover:(${amqConnectionList})?nested.wireFormat.maxInactivityDuration=5000&jms.prefetchPolicy.all=1"
         
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory()
         connectionFactory.setBrokerURL(amqURLString)
