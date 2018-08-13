@@ -12,14 +12,9 @@ pipeline {
 
 java -Xmx32m -version
 
-#./mvnw install -DskipTests=true -Dmaven.javadoc.skip=true -B -V
+./mvnw clean package -DskipTests=true -Dmaven.javadoc.skip=true -B -V
 
-
-ls -l
-
-mvn help:all-profiles 
-
-
+ls -lR
 
 '''
       }
