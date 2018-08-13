@@ -17,7 +17,7 @@ java -Xmx32m -version
 
 ls -l
 
-
+mvn help:all-profiles 
 
 
 
