@@ -1,0 +1,86 @@
+apiVersion: apps.openshift.io/v1
+kind: DeploymentConfig
+metadata:
+  labels:
+    app: grails-messaging-test-1
+  name: grails-messaging-test-1
+spec:
+  replicas: 0
+  selector:
+    deploymentconfig: grails-messaging-test-1
+  strategy:
+    activeDeadlineSeconds: 21600
+    resources: {}
+    rollingParams:
+      intervalSeconds: 1
+      maxSurge: 25%
+      maxUnavailable: 25%
+      timeoutSeconds: 600
+      updatePeriodSeconds: 1
+    type: Rolling
+  template:
+    metadata:
+      creationTimestamp: null
+      labels:
+        app: grails-messaging-test-1
+        deploymentconfig: grails-messaging-test-1
+    spec:
+      containers:
+        - image: >-
+            docker-registry.default.svc:5000/chassi-dev/grails-messaging-test-1
+          imagePullPolicy: Always
+          name: grails-messaging-test-1
+          ports:
+            - containerPort: 8080
+              protocol: TCP
+            - containerPort: 8443
+              protocol: TCP
+            - containerPort: 8778
+              protocol: TCP
+          env:
+              - key: API_SERVER_ADDRESS
+                from: config: grails-messaging-test-configmap:API_SERVER_ADDRESS
+              - key: API_SERVER_PORT
+                from: config: grails-messaging-test-configmap:API_SERVER_PORT
+              - key: ADMIN_SERVER_PORT
+                from: config: grails-messaging-test-configmap:ADMIN_SERVER_PORT
+              - key: API_REST_SERVER_PROTOCOL
+                from: config: grails-messaging-test-configmap:API_REST_SERVER_PROTOCOL
+              - key: AMQ_HOST
+                from: config: grails-messaging-test-configmap:AMQ_HOST
+              - key: AMQ_PORT
+                from: config: grails-messaging-test-configmap:AMQ_PORT
+              - key: AMQ_USER
+                from: config: grails-messaging-test-configmap:AMQ_USER
+              - key: AMQ_PASS
+                from: config: grails-messaging-test-configmap:AMQ_PASS
+              - key: ENABLE_CONSUMER_PRODCER_TEST
+                from: config: grails-messaging-test-configmap:ENABLE_CONSUMER_PRODCER_TEST
+              - key: ENABLE_BENCHMARK_TEST
+                from: config: grails-messaging-test-configmap:ENABLE_BENCHMARK_TEST
+              - key: BENCHMARK_THREADS
+                from: config: grails-messaging-test-configmap:BENCHMARK_THREADS
+              - key: BENCHMARK_TOTAL_MSGS
+                from: config: grails-messaging-test-configmap:BENCHMARK_TOTAL_MSGS
+              - key: ENABLE_REQUEST_REPLY_TEST
+                from: config: grails-messaging-test-configmap:ENABLE_REQUEST_REPLY_TEST
+          resources: {}
+          terminationMessagePath: /dev/termination-log
+          terminationMessagePolicy: File
+      dnsPolicy: ClusterFirst
+      restartPolicy: Always
+      schedulerName: default-scheduler
+      securityContext: {}
+      terminationGracePeriodSeconds: 30
+  test: false
+  triggers:
+    - imageChangeParams:
+        automatic: true
+        containerNames:
+          - grails-messaging-test-1
+        from:
+          kind: ImageStreamTag
+          name: 'grails-messaging-test-1:latest'
+          namespace: chassi-dev
+      type: ImageChange
+    - type: ConfigChange

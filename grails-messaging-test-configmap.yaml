@@ -1,0 +1,17 @@
+apiVersion: v1
+data:
+  API_SERVER_ADDRESS: '0.0.0.0'
+  API_SERVER_PORT: '8080'
+  ADMIN_SERVER_PORT: '9080'
+  API_REST_SERVER_PROTOCOL: 'http'
+  AMQ_HOST: 'ssl://b-68f4ef41-075c-46cc-8bdb-457d4c6887df-1.mq.us-east-1.amazonaws.com:61617'
+  AMQ_USER: 'mquser'
+  AMQ_PASS: 'Weihf3238ssfjj'
+  ENABLE_CONSUMER_PRODCER_TEST: 'false'
+  ENABLE_BENCHMARK_TEST: 'true'
+  BENCHMARK_THREADS: '10'
+  BENCHMARK_TOTAL_MSGS: '10000'
+  ENABLE_REQUEST_REPLY_TEST: 'true'
+kind: ConfigMap
+metadata:
+  name: grails-messaging-test-configmap
