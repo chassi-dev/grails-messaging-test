@@ -19,37 +19,37 @@ class ExampleServiceRouteBuilder extends RouteBuilder {
 
     void configure() {
 
-        rest('/example-resource')
-            .post()
-                .id('example-resource-create')
-                .to('direct:opr-example-resource-create')
-
-        from('activemq:queue:example-resource-create')
-            .id('queueu-example-resource-create')
-            .to('direct:opr-example-resource-create')
-
-        from('direct:opr-example-resource-create')
-            .bean('example-resource-svc', 'create')
-
-            // fire off and forget event
-            .wireTap('direct:event-example-resource-create')
-
-        // event reactor
-        from('direct:event-example-resource-create')
-            // thread (seda)
-            .process {
-                    // marshall into event
-                }
-            .to('activemq:topic:example-svc.1.event-example-resource-create')
-
-
-        // event listener
-        from('activemq:topic:example-svc.1.event-example-resource-create')
-            .routeId('event-listener-example-resource-create')
-            .to('activemq:queue:example-svc.1.dispatcher-event-example-resource-create')
-
-
-        from('direct:dispatcher-event-example-resource-create')
+//        rest('/example-resource')
+//            .post()
+//                .id('example-resource-create')
+//                .to('direct:opr-example-resource-create')
+//
+//        from('activemq:queue:example-resource-create')
+//            .id('queueu-example-resource-create')
+//            .to('direct:opr-example-resource-create')
+//
+//        from('direct:opr-example-resource-create')
+//            .bean('example-resource-svc', 'create')
+//
+//            // fire off and forget event
+//            .wireTap('direct:event-example-resource-create')
+//
+//        // event reactor
+//        from('direct:event-example-resource-create')
+//            // thread (seda)
+//            .process {
+//                    // marshall into event
+//                }
+//            .to('activemq:topic:example-svc.1.event-example-resource-create')
+//
+//
+//        // event listener
+//        from('activemq:topic:example-svc.1.event-example-resource-create')
+//            .routeId('event-listener-example-resource-create')
+//            .to('activemq:queue:example-svc.1.dispatcher-event-example-resource-create')
+//
+//
+//        from('direct:dispatcher-event-example-resource-create')
 
 
 
