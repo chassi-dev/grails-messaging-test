@@ -14,6 +14,7 @@ import org.springframework.context.ApplicationContext
 import org.springframework.context.annotation.Bean
 import org.springframework.context.annotation.Configuration
 import org.springframework.context.annotation.Primary
+import org.springframework.jms.listener.DefaultMessageListenerContainer
 
 @Configuration
 class ConfigBeans {
@@ -28,7 +29,7 @@ class ConfigBeans {
         
         // supports single or comma-separated amqHost brokers
         def amqConnectionList = System.getenv('AMQ_CONNECTION_LIST')?.trim() ?: 'tcp://localhost:61616'
-        String amqURLString = "failover:(${amqConnectionList})?nested.wireFormat.maxInactivityDuration=5000&jms.prefetchPolicy.all=1"
+        String amqURLString = "failover:(${amqConnectionList})"
         
         ActiveMQConnectionFactory connectionFactory = new ActiveMQConnectionFactory()
         connectionFactory.setBrokerURL(amqURLString)
@@ -53,6 +54,9 @@ class ConfigBeans {
     @Bean
     public JmsConfiguration getJmsConfiguration() {
         JmsConfiguration jmsConfiguration = new JmsConfiguration()
+        
+        jmsConfiguration.setCacheLevel(DefaultMessageListenerContainer.CACHE_NONE)
+        
         jmsConfiguration.setConnectionFactory(pooledConnectionFactory())
         return jmsConfiguration
     }
