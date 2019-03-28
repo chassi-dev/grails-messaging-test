@@ -23,9 +23,9 @@ pipeline {
     options {
         //buildDiscarder(logRotator(numToKeepStr: '1'))
         disableConcurrentBuilds()
-        parallelsAlwaysFailFast()
+        //parallelsAlwaysFailFast()
         skipStagesAfterUnstable()
-        timestamps()
+        //timestamps()
     }
 
     //triggers {
