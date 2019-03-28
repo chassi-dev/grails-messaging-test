@@ -1,7 +1,7 @@
 openshift.withCluster() {
     env.NAMESPACE = openshift.project()
     env.POM_FILE = env.BUILD_CONTEXT_DIR ? "${env.BUILD_CONTEXT_DIR}/pom.xml" : "pom.xml"
-    env.APP_NAME = "${env.JOB_NAME}".replaceAll(/-?pipeline-?/, '').replaceAll(/-?${env.NAMESPACE}-?/, '').replaceAll("/", '')
+    env.APP_NAME = "${env.JOB_NAME - env.JOB_BASE_NAME - '/'}")
     echo "Starting Pipeline for ${APP_NAME}..."
     //def projectBase = "${env.NAMESPACE}".replaceAll(/-build/, '')
 }
