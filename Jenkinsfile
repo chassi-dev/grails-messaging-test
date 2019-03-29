@@ -62,9 +62,10 @@ pipeline {
                 expression { return env.GIT_BRANCH == "1.x/${env.NAMESPACE}" && currentBuild.result == "SUCCESS" }
             }
 
-            //timeout(time: 10, unit: 'MINUTES')
 
             steps {
+                //timeout(time: 10, unit: 'MINUTES')
+                
                 sh "./mvnw clean package -DskipTests=true -f ${POM_FILE}"
             }
         }
@@ -75,9 +76,9 @@ pipeline {
                 expression { return env.GIT_BRANCH == "1.x/${env.NAMESPACE}" && currentBuild.result == "SUCCESS" }
             }
 
-            //timeout(time: 10, unit: 'MINUTES')
-
             steps {
+                //timeout(time: 10, unit: 'MINUTES')
+                
                 sh "echo 'Skipping unit tests (for now)'"
                 //sh "mvn test -f ${POM_FILE}"
             }
@@ -89,9 +90,9 @@ pipeline {
                 expression { return env.GIT_BRANCH == "1.x/${env.NAMESPACE}" && currentBuild.result == "SUCCESS" }
             }
 
-            //timeout(time: 10, unit: 'MINUTES')
-
             steps {
+                //timeout(time: 10, unit: 'MINUTES')
+                
                 // Copy the resulting artifacts into common directory
                 sh """
                     ls target/*
@@ -119,9 +120,9 @@ pipeline {
                 expression { return env.BRANCH_NAME != env.NAMESPACE }
             }
 
-            timeout(time: 10, unit: 'MINUTES')
-
             steps {
+                //timeout(time: 10, unit: 'MINUTES')
+                
                 script {
                     sh "oc get dc ${env.APP_NAME}"
 /*                    openshift.withCluster() {
