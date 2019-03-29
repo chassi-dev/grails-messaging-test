@@ -119,19 +119,25 @@ pipeline {
                 expression { return env.BRANCH_NAME != env.NAMESPACE }
             }
 
-            //timeout(time: 20, unit: 'MINUTES')
+            timeout(time: 10, unit: 'MINUTES')
 
             steps {
                 script {
-                    openshift.withCluster() {
+                    sh "oc get dc ${env.APP_NAME}"
+/*                    openshift.withCluster() {
                         def dcObj = openshift.selector('dc', env.APP_NAME).object()
-                        def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
-                        podSelector.untilEach {
-                            echo "pod: ${it.name()}"
-                            return it.object().status.containerStatuses[0].ready
-                        }
+
+
+                        //def podSelector = openshift.selector('pod', [deployment: "${APP_NAME}-${dcObj.status.latestVersion}"])
+                        //
+                        //println("podSelector: ${podSelector}")
+                        //
+                        //podSelector.untilEach {
+                        //    echo "pod: ${it.name()}"
+                        //    return it.object().status.containerStatuses[0].ready
+                        //}
                     }
-                }
+*/                }
             }
         }
 
